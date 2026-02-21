@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use crate::{
     actors::ADDRESSES,
-    signals::library_signals::{AddToLibrary, LibraryState, UpdateCache},
+    signals::library_signals::{AddToLibrary, DisplayLibrary, LibraryState, UpdateCache},
     utility::state::STATE,
 };
 use async_trait::async_trait;
@@ -86,6 +86,12 @@ impl Notifiable<UpdateCache> for LibraryActor {
             }
         };
 
-        LibraryState::NoLibraryAvailable.send_signal_to_dart();
+        let books;
+
+        {
+            books = STATE.get().unwrap().read().await.get_book_data();
+        }
+
+        LibraryState::Show(DisplayLibrary { data: books }).send_signal_to_dart();
     }
 }

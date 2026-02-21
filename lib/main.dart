@@ -11,6 +11,9 @@ Future<void> main() async {
   AppSupportDirectory(
     path: (await getApplicationSupportDirectory()).path,
   ).sendSignalToRust();
+  WidgetsFlutterBinding.ensureInitialized();
+  PaintingBinding.instance.imageCache.maximumSizeBytes = 200_000_000; // 200M 
+  PaintingBinding.instance.imageCache.maximumSize = 400; // max 400 images cached
   runApp(MyApp());
 }
 

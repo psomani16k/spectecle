@@ -4,6 +4,7 @@ use std::str::FromStr;
 use std::sync::OnceLock;
 use tokio::sync::RwLock;
 
+use crate::signals::library_signals::BookData;
 use crate::utility::cache::Cache;
 use crate::utility::library::Library;
 
@@ -62,5 +63,16 @@ impl State {
             }
             None => todo!(),
         }
+    }
+
+    pub fn get_book_data(&self) -> Vec<BookData> {
+        if !self.has_lib() || self.cache.is_none() {
+            return vec![];
+        }
+        return self
+            .cache
+            .as_ref()
+            .unwrap()
+            .get_book_data(self.library.get_open_lib().unwrap());
     }
 }
