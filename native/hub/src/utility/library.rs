@@ -1,11 +1,10 @@
 use std::{
     fs,
-    io::{Read, Write},
+    io::Read,
     path::PathBuf,
 };
 
 use anyhow::Ok;
-use rinf::debug_print;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -17,7 +16,6 @@ pub struct Library {
 impl Library {
     pub fn open(support_dir: &PathBuf) -> anyhow::Result<Library> {
         let lib_file = support_dir.join("lib.json");
-        debug_print!("lib.json path: {:?}", lib_file);
         if lib_file.exists() {
             let mut file = fs::File::open(&lib_file)?;
             let mut contents = String::new();

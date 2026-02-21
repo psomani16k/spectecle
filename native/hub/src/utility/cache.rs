@@ -12,7 +12,6 @@ use fast_image_resize::{IntoImageView, Resizer};
 use image::{DynamicImage, ImageFormat, ImageReader, RgbaImage};
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use regex::Regex;
-use rinf::debug_print;
 use serde::{Deserialize, Serialize};
 use walkdir::{DirEntry, WalkDir};
 
@@ -121,7 +120,7 @@ impl Cache {
     }
 
     pub fn get_book_data(&self, open_lib: PathBuf) -> Vec<BookData> {
-        let book_data: Vec<BookData> = self
+        let mut book_data: Vec<BookData> = self
             .data
             .items
             .iter()
@@ -149,7 +148,7 @@ impl Cache {
                 };
             })
             .collect();
-
+        book_data.sort_by(|a, b| a.title.cmp(&b.title));
         return book_data;
     }
 
@@ -322,7 +321,6 @@ impl Cache {
 
     fn write_covers_par(&mut self, force: bool) -> anyhow::Result<()> {
         if force || self.covers.len() >= BATCH_SIZE {
-            debug_print!("{}", self.covers.len());
             let errors: Vec<anyhow::Result<()>> = self
                 .covers
                 .par_iter()

@@ -12,8 +12,9 @@ Future<void> main() async {
     path: (await getApplicationSupportDirectory()).path,
   ).sendSignalToRust();
   WidgetsFlutterBinding.ensureInitialized();
-  PaintingBinding.instance.imageCache.maximumSizeBytes = 200_000_000; // 200M 
-  PaintingBinding.instance.imageCache.maximumSize = 400; // max 400 images cached
+  PaintingBinding.instance.imageCache.maximumSizeBytes = 200_000_000; // 200M
+  PaintingBinding.instance.imageCache.maximumSize =
+      400; // max 400 images cached
   runApp(MyApp());
 }
 
@@ -34,10 +35,11 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  int _selectedIndex = 0;
+  int _selectedIndex = 1;
   @override
   Widget build(BuildContext context) {
     return AdaptiveScaffold(
+      transitionDuration: Duration.zero,
       destinations: [
         NavigationDestination(icon: Icon(Icons.menu_book), label: "Reading"),
         NavigationDestination(icon: Icon(Icons.shelves), label: "Library"),
@@ -47,7 +49,7 @@ class _HomeState extends State<Home> {
         setState(() => _selectedIndex = index);
       },
       body: (context) {
-        return widget._pages[_selectedIndex];
+        return IndexedStack(index: _selectedIndex, children: widget._pages);
       },
     );
   }

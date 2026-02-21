@@ -14,7 +14,7 @@ use rinf::{DartSignal, RustSignal};
 use tokio::{spawn, task::JoinSet};
 
 pub struct LibraryActor {
-    tasks: JoinSet<()>,
+    _tasks: JoinSet<()>,
 }
 
 impl Actor for LibraryActor {}
@@ -25,7 +25,7 @@ impl LibraryActor {
         let mut owned_tasks = JoinSet::new();
         owned_tasks.spawn(Self::listen_add_to_library(self_addr.clone()));
 
-        spawn(ctx.run(Self { tasks: owned_tasks }));
+        spawn(ctx.run(Self { _tasks: owned_tasks }));
 
         let has_lib = {
             let state = STATE.get().unwrap().read().await;

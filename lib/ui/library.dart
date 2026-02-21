@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -27,54 +26,57 @@ class _LibraryState extends State<Library> {
       child: StreamBuilder(
         stream: LibraryState.rustSignalStream,
         builder: (context, snapshot) {
+          LibraryState state = LibraryStateRefreshingCache();
           if (snapshot.hasData) {
-            final state = snapshot.data!.message;
-            if (state is LibraryStateShow) {
-              _bookData = state.value.data;
-            } else if (state is LibraryStateRefreshingCache) {
-              return Center(
-                child: Column(
-                  children: [
-                    CircularProgressIndicator(),
-                    Text("Refreshing Cache, just a second!"),
-                  ],
-                ),
-              );
-            } else if (state is LibraryStateRebuildingCache) {
-              return Center(
-                child: Column(
-                  children: [
-                    CircularProgressIndicator(),
-                    Text("Building Cache, this could take a minute!"),
-                  ],
-                ),
-              );
-            } else if (state is LibraryStateNoLibraryAvailable) {
-              return Center(
-                child: Column(
-                  children: [
-                    Text("No Library selected"),
-                    FilledButton.tonal(
-                      onPressed: () async {
-                        final newLib = await FilePicker.platform
-                            .getDirectoryPath();
-                        if (newLib != null) {
-                          AddToLibrary(path: newLib).sendSignalToRust();
-                        }
-                      },
-                      child: Text("Add Library"),
-                    ),
-                  ],
-                ),
-              );
-            } else if (state is LibraryStateShow) {
-              _bookData = state.value.data;
-            }
+            state = snapshot.data!.message;
+          } else if (LibraryState.latestRustSignal != null) {
+            state = LibraryState.latestRustSignal!.message;
+          }
+          if (state is LibraryStateShow) {
+            _bookData = state.value.data;
+          } else if (state is LibraryStateRefreshingCache) {
+            return Center(
+              child: Column(
+                children: [
+                  CircularProgressIndicator(),
+                  Text("Refreshing Cache, just a second!"),
+                ],
+              ),
+            );
+          } else if (state is LibraryStateRebuildingCache) {
+            return Center(
+              child: Column(
+                children: [
+                  CircularProgressIndicator(),
+                  Text("Building Cache, this could take a minute!"),
+                ],
+              ),
+            );
+          } else if (state is LibraryStateNoLibraryAvailable) {
+            return Center(
+              child: Column(
+                children: [
+                  Text("No Library selected"),
+                  FilledButton.tonal(
+                    onPressed: () async {
+                      final newLib = await FilePicker.platform
+                          .getDirectoryPath();
+                      if (newLib != null) {
+                        AddToLibrary(path: newLib).sendSignalToRust();
+                      }
+                    },
+                    child: Text("Add Library"),
+                  ),
+                ],
+              ),
+            );
+          } else if (state is LibraryStateShow) {
+            _bookData = state.value.data;
           }
           return GridView.builder(
             gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
               maxCrossAxisExtent: 250,
-              childAspectRatio: 0.57,
+              childAspectRatio: 0.62,
               mainAxisSpacing: 6,
               crossAxisSpacing: 8,
             ),
@@ -108,6 +110,7 @@ class LibraryGridTile extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.max,
             children: [
               AspectRatio(
                 aspectRatio: 3 / 4,
@@ -115,26 +118,27 @@ class LibraryGridTile extends StatelessWidget {
                     ? const Center(child: Icon(Icons.book))
                     : Image.file(
                         File(bookData.coverPath!),
-                        // 1. Fills the box entirely, cropping the edges of the image
                         fit: BoxFit.cover,
-                        // 2. Crucial for 165Hz: matches the decode size to the display size
                         cacheHeight: 400,
-                        // 3. Improves performance by not checking for image changes on every build
                         filterQuality: FilterQuality.low,
                       ),
               ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  bookData.title,
-                  textAlign: TextAlign.center,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+              Spacer(),
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Text(
+                    bookData.title,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
+              Spacer(),
             ],
           ),
         ),
